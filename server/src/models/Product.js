@@ -7,6 +7,8 @@ const productSchema = new mongoose.Schema(
     priceCents: { type: Number, required: true, min: 0, validate: Number.isInteger },
     unit: { type: String, enum: ['kg', 'bunch', 'piece', 'bag'], default: 'kg' },
     category: { type: String, trim: true, maxlength: 60, default: 'Vegetables' },
+    // Optional "was" price. When greater than priceCents the product is on sale (powers Deals + discount badges).
+    compareAtPriceCents: { type: Number, min: 1, validate: Number.isInteger },
     stock: { type: Number, required: true, min: 0, default: 0, validate: Number.isInteger },
     imageUrl: { type: String, trim: true, maxlength: 500 },
     // Soft delete: keeps order history intact.

@@ -7,10 +7,18 @@ const { pageMeta } = require('../utils/pagination');
 const validate = require('../middleware/validate');
 const s = require('../validation/schemas');
 
-async function listProducts({ q, category, page, limit }, { includeInactive }) {
+async function listProducts({ q, category, page, limit, minPriceCents, maxPriceCents, inStock, onSale }, { includeInactive }) {
   const filter = includeInactive ? {} : { active: true };
   if (q) filter.name = { $regex: escapeRegex(q), $options: 'i' };
   if (category) filter.category = category;
+  if (minPriceCents !== undefined || maxPriceCents !== undefined) {
+    filter.priceCents = {};
+    if (minPriceCents !== undefined) filter.priceCents.$gte = minPriceCents;
+    if (maxPriceCents !== undefined) filter.priceCents.$lte = maxPriceCents;
+  }
+  if (inStock) filter.stock = { $gt: 0 };
+  // Missing/null compareAtPriceCents sorts below any number in BSON, so those products never match.
+  if (onSale) filter.$expr = { $gt: ['$compareAtPriceCents', '$priceCents'] };
   const [items, total] = await Promise.all([
     Product.find(filter).sort({ name: 1 }).skip((page - 1) * limit).limit(limit),
     Product.countDocuments(filter),

@@ -7,11 +7,11 @@ const User = require('../models/User');
 const Product = require('../models/Product');
 
 const SAMPLE = [
-  { name: 'Hass Avocado', category: 'Fruits & Avocados', unit: 'piece', priceCents: 5000, stock: 200 },
+  { name: 'Hass Avocado', category: 'Fruits & Avocados', unit: 'piece', priceCents: 5000, compareAtPriceCents: 6500, stock: 200 },
   { name: 'Potatoes', category: 'Root Vegetables', unit: 'kg', priceCents: 8000, stock: 150 },
   { name: 'Kale (Sukuma Wiki)', category: 'Leafy Greens', unit: 'bunch', priceCents: 3000, stock: 120 },
   { name: 'Spinach', category: 'Leafy Greens', unit: 'bunch', priceCents: 3500, stock: 100 },
-  { name: 'Tomatoes', category: 'Vegetables', unit: 'kg', priceCents: 12000, stock: 80 },
+  { name: 'Tomatoes', category: 'Vegetables', unit: 'kg', priceCents: 12000, compareAtPriceCents: 15000, stock: 80 },
   { name: 'Red Onions', category: 'Vegetables', unit: 'kg', priceCents: 10000, stock: 90 },
   { name: 'Carrots', category: 'Root Vegetables', unit: 'kg', priceCents: 9000, stock: 70 },
 ];

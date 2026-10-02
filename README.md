@@ -7,7 +7,7 @@ Stack: **React (Vite) · Node.js/Express · MongoDB (Mongoose)**.
 
 ```bash
 # 1. MongoDB (or use your own instance)
-docker run -d -p 27017:27017 --name gm-mongo mongo:7
+docker compose up -d 
 
 # 2. API
 cd server
@@ -31,6 +31,10 @@ docker compose exec -e ADMIN_PASSWORD='a-long-password' server node src/scripts/
 ```
 
 Put a TLS-terminating proxy (Caddy, nginx, a cloud load balancer) in front for HTTPS.
+
+## Frontend (Phase 2)
+React + Vite + Tailwind CSS + shadcn-style components + Lucide icons. See `docs/PHASE2.md` (design system, brand assets) and `docs/PHASE3.md` (checkout, orders and admin screens).
+After pulling Phase 2 run `cd client && npm install` (new dependencies) before `npm run dev` / `npm run build`.
 
 ## Features
 
@@ -72,7 +76,7 @@ Order flow: `pending → confirmed → out_for_delivery → delivered`; `pending
 - [x] Atomic stock reservation, idempotent checkout, conditional status transitions
 - [x] Pagination, indexes, structured logs with request IDs (secrets redacted), health checks
 - [x] Unit + integration tests, CI pipeline, Dockerfiles, compose file
-- [ ] **Run `npm install` and commit the lockfiles**, then confirm `npm test` is green in your CI
+- [ ] **Run `npm install` and commit the lockfiles**; run `npm run build` in `client/` and click through every page at 320 / 375 / 768 / 1024 / 1280 px, then confirm `npm test` is green in your CI
 - [ ] Put HTTPS in front; set a strong `JWT_SECRET`; enable MongoDB auth / managed MongoDB with backups
 - [ ] Add error tracking and uptime alerts (e.g. Sentry, UptimeRobot)
 - [ ] Manually click through the journeys on a staging deployment, on a phone

@@ -21,22 +21,36 @@ const productBody = z.object({
   name: trimmed(120),
   description: z.string().trim().max(1000).optional(),
   priceCents: z.number().int().min(0).max(100_000_000),
+  compareAtPriceCents: z.number().int().min(1).max(100_000_000).nullable().optional(),
   unit: z.enum(['kg', 'bunch', 'piece', 'bag']),
   category: trimmed(60).optional(),
   stock: z.number().int().min(0).max(1_000_000),
   imageUrl: z.string().trim().url().max(500).regex(/^https?:\/\//i).optional().or(z.literal('')),
   active: z.boolean().optional(),
 });
-const productCreate = productBody;
+const productCreate = productBody.refine(
+  (v) => v.compareAtPriceCents == null || v.compareAtPriceCents > v.priceCents,
+  { message: 'Original price must be higher than the selling price', path: ['compareAtPriceCents'] }
+);
 const productUpdate = productBody.partial().refine((v) => Object.keys(v).length > 0, 'No fields to update');
 const stockAdjust = z.object({ delta: z.number().int().min(-1_000_000).max(1_000_000).refine((n) => n !== 0) });
 
-const productQuery = z.object({
-  q: z.string().trim().max(60).optional(),
-  category: z.string().trim().max(60).optional(),
-  page,
-  limit,
-});
+const flag = z.enum(['1', 'true']).optional().transform((v) => v !== undefined);
+const productQuery = z
+  .object({
+    q: z.string().trim().max(60).optional(),
+    category: z.string().trim().max(60).optional(),
+    minPriceCents: z.coerce.number().int().min(0).optional(),
+    maxPriceCents: z.coerce.number().int().min(0).optional(),
+    inStock: flag,
+    onSale: flag,
+    page,
+    limit,
+  })
+  .refine((v) => v.minPriceCents === undefined || v.maxPriceCents === undefined || v.minPriceCents <= v.maxPriceCents, {
+    message: 'minPriceCents must not exceed maxPriceCents',
+    path: ['minPriceCents'],
+  });
 
 const orderCreate = z.object({
   items: z

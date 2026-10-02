@@ -16,7 +16,7 @@ export function CartProvider({ children }) {
     setItems((cur) => {
       const found = cur.find((i) => i.productId === p.id);
       const quantity = Math.min((found?.quantity || 0) + qty, p.stock);
-      const line = { productId: p.id, name: p.name, unit: p.unit, priceCents: p.priceCents, stock: p.stock, quantity };
+      const line = { productId: p.id, name: p.name, unit: p.unit, priceCents: p.priceCents, stock: p.stock, imageUrl: p.imageUrl, quantity };
       return found ? cur.map((i) => (i.productId === p.id ? line : i)) : [...cur, line];
     });
   const setQty = (id, q) =>

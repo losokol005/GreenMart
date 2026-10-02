@@ -21,12 +21,25 @@ router.get('/products', validate(s.productQuery, 'query'), asyncHandler(async (r
 router.post('/products', validate(s.productCreate), asyncHandler(async (req, res) => {
   const body = { ...req.body };
   if (!body.imageUrl) delete body.imageUrl;
+  if (body.compareAtPriceCents == null) delete body.compareAtPriceCents;
   res.status(201).json({ product: await Product.create(body) });
 }));
 
 router.patch('/products/:id', validate(s.idParam, 'params'), validate(s.productUpdate), asyncHandler(async (req, res) => {
-  const product = await Product.findByIdAndUpdate(req.params.id, { $set: req.body }, { new: true, runValidators: true });
-  if (!product) throw new AppError(404, 'NOT_FOUND', 'Product not found');
+  const existing = await Product.findById(req.params.id);
+  if (!existing) throw new AppError(404, 'NOT_FOUND', 'Product not found');
+  const { compareAtPriceCents, ...fields } = req.body;
+  const update = { $set: fields };
+  if (compareAtPriceCents === null) update.$unset = { compareAtPriceCents: '' }; // null clears the deal
+  else if (compareAtPriceCents !== undefined) fields.compareAtPriceCents = compareAtPriceCents;
+
+  const nextPrice = fields.priceCents ?? existing.priceCents;
+  const nextCompare = compareAtPriceCents === undefined ? existing.compareAtPriceCents : compareAtPriceCents;
+  if (nextCompare != null && nextCompare <= nextPrice) {
+    throw new AppError(400, 'VALIDATION_ERROR', 'Original price must be higher than the selling price (clear it to end the deal)');
+  }
+  if (Object.keys(fields).length === 0) delete update.$set;
+  const product = await Product.findByIdAndUpdate(req.params.id, update, { new: true, runValidators: true });
   res.json({ product });
 }));
 

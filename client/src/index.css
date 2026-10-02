@@ -1,0 +1,40 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Brand palette (RGB channels) */
+    --primary: 47 125 50;          /* Deep Green  #2F7D32 */
+    --leaf: 76 175 80;             /* Secondary   #4CAF50 */
+    --fresh: 102 187 106;          /* Fresh Green #66BB6A */
+    --forest: 16 33 22;            /* Dark Forest #102116 */
+    --soil: 139 94 60;             /* Soil        #8B5E3C */
+    --soil-light: 176 137 104;     /* Light Soil  #B08968 */
+    --cream: 247 243 234;          /* Cream       #F7F3EA */
+
+    /* Semantic tokens */
+    --background: 248 250 247;     /* #F8FAF7 */
+    --card: 255 255 255;
+    --foreground: 23 32 24;        /* Text        #172018 */
+    --muted-foreground: 102 115 106; /* Muted     #66736A */
+    --primary-foreground: 255 255 255;
+    --secondary: 247 243 234;
+    --muted: 240 244 238;
+    --accent: 232 242 230;
+    --destructive: 179 38 30;
+    --border: 225 232 222;
+    --input: 200 211 197;
+    --ring: 47 125 50;
+    --radius: 0.5rem;
+  }
+  * { @apply border-border; }
+  body { @apply bg-background font-sans text-foreground antialiased; }
+  h1, h2, h3 { @apply tracking-tight; }
+}
+
+@media (prefers-reduced-motion: no-preference) { html { scroll-behavior: smooth; } }
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
+}
+@media print { .site-chrome, [data-sonner-toaster], .no-print { display: none !important; } body { background: #fff; } }

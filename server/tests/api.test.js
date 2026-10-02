@@ -171,6 +171,44 @@ describe('orders', () => {
   });
 });
 
+describe('catalogue filters and deals', () => {
+  beforeEach(async () => {
+    await Product.create([
+      { name: 'Cabbage', priceCents: 2000, stock: 5 },
+      { name: 'Mango', priceCents: 9000, stock: 0, compareAtPriceCents: 12000 },
+    ]);
+  });
+  const names = async (query) => (await request(app).get(`/api/v1/products${query}`)).body.items.map((p) => p.name);
+
+  test('filters by price range (minor units)', async () => {
+    expect(await names('?minPriceCents=3000&maxPriceCents=6000')).toEqual(['Avocado']);
+  });
+  test('filters by availability', async () => {
+    expect(await names('?inStock=true')).toEqual(['Avocado', 'Cabbage']);
+  });
+  test('filters deals only', async () => {
+    expect(await names('?onSale=1')).toEqual(['Mango']);
+  });
+  test('rejects an inverted price range', async () => {
+    expect((await request(app).get('/api/v1/products?minPriceCents=900&maxPriceCents=100')).status).toBe(400);
+  });
+  test('original price must exceed the selling price', async () => {
+    const make = (compareAtPriceCents) => request(app).post('/api/v1/admin/products').set(bearer(admin))
+      .send({ name: 'Deal', priceCents: 5000, unit: 'kg', stock: 1, compareAtPriceCents });
+    expect((await make(4000)).status).toBe(400);
+    expect((await make(6000)).status).toBe(201);
+  });
+  test('admin can end a deal with null, and cannot raise price above the original price', async () => {
+    const mango = await Product.findOne({ name: 'Mango' });
+    const patch = (body) => request(app).patch(`/api/v1/admin/products/${mango._id}`).set(bearer(admin)).send(body);
+    expect((await patch({ priceCents: 13000 })).status).toBe(400);
+    const cleared = await patch({ compareAtPriceCents: null });
+    expect(cleared.status).toBe(200);
+    expect(cleared.body.product.compareAtPriceCents).toBeUndefined();
+    expect(await names('?onSale=1')).toEqual([]);
+  });
+});
+
 describe('platform', () => {
   test('health, readiness, unknown routes and malformed JSON', async () => {
     expect((await request(app).get('/health')).status).toBe(200);
